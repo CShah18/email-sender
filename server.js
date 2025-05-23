@@ -27,7 +27,7 @@ app.post("/send-email", async (req, res) => {
 
   const mailOptions = {
     from: process.env.SMTP_EMAIL_FROM,
-    to: process.env.SMTP_EMAIL_FROM, // You can change this if needed
+    to: "shivamui.webforest@gmail.com", // You can change this if needed
     subject: `Message from ${fname}`,
     text: `
       Name: ${fname}
