@@ -19,15 +19,20 @@ const transporter = nodemailer.createTransport({
 });
 
 app.post("/send-email", async (req, res) => {
-  const { fname, city, phone, email, message } = req.body;
+  const { fname, city, phone, email, message, site } = req.body;
 
   if (!fname || !city || !phone || !email || !message) {
     return res.status(400).json({ error: "All fields are required" });
   }
 
+  let toEmail = "shivamui.webforest@gmail.com";
+  if (site === "elektrotechnik-kissel.de") { toEmail = "kontakt@elektrotechnik-kissel.de" }
+  else if (site === "kammerjaeger-brinkmann.de") { toEmail = "kontakt@kammerjaeger-brinkmann.de" }
+  else if (site === "klempner-albrecht.de") { toEmail = "kontakt@klempner-albrecht.de" }
+
   const mailOptions = {
     from: process.env.SMTP_EMAIL_FROM,
-    to: "shivamui.webforest@gmail.com", // You can change this if needed
+    to: toEmail,
     subject: `Message from ${fname}`,
     text: `
       Name: ${fname}
