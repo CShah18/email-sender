@@ -8,16 +8,6 @@ const app = express();
 app.use(cors());
 app.use(bodyParser.json());
 
-const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST,
-  port: Number(process.env.SMTP_PORT),
-  secure: false, // TLS uses port 587 usually, secure false for STARTTLS
-  auth: {
-    user: process.env.SMTP_USERNAME,
-    pass: process.env.SMTP_PASSWORD,
-  },
-});
-
 app.post("/send-email", async (req, res) => {
   const { fname, city, phone, email, message, site } = req.body;
 
@@ -25,13 +15,24 @@ app.post("/send-email", async (req, res) => {
     return res.status(400).json({ error: "All fields are required" });
   }
 
+  const transporter = nodemailer.createTransport({
+    host: site ? process.env.CUSTOM_SMTP_HOST : process.env.SMTP_HOST,
+    port: site ? Number(process.env.CUSTOM_SMTP_PORT) : Number(process.env.SMTP_PORT),
+    secure: site ? true : false,
+    auth: {
+      user: site === "elektrotechnik-kissel.de" ? process.env.CUSTOM_SMTP_USERNAME_1 : site === "kammerjaeger-brinkmann.de" ? process.env.CUSTOM_SMTP_USERNAME_2 : site === "klempner-albrecht.de" ? process.env.CUSTOM_SMTP_USERNAME_3 : process.env.SMTP_USERNAME,
+      pass: site ? process.env.CUSTOM_SMTP_PASSWORD : process.env.SMTP_PASSWORD,
+    },
+  });
+
   let toEmail = "shivamui.webforest@gmail.com";
-  if (site === "elektrotechnik-kissel.de") { toEmail = "kontakt@elektrotechnik-kissel.de" }
-  else if (site === "kammerjaeger-brinkmann.de") { toEmail = "kontakt@kammerjaeger-brinkmann.de" }
-  else if (site === "klempner-albrecht.de") { toEmail = "kontakt@klempner-albrecht.de" }
+  let fromEmail = process.env.SMTP_EMAIL_FROM;
+  if (site === "elektrotechnik-kissel.de") { toEmail = "kontakt@elektrotechnik-kissel.de", fromEmail = "kontakt@elektrotechnik-kissel.de" }
+  else if (site === "kammerjaeger-brinkmann.de") { toEmail = "kontakt@kammerjaeger-brinkmann.de", fromEmail = "kontakt@kammerjaeger-brinkmann.de" }
+  else if (site === "klempner-albrecht.de") { toEmail = "kontakt@klempner-albrecht.de", fromEmail = "kontakt@klempner-albrecht.de" }
 
   const mailOptions = {
-    from: process.env.SMTP_EMAIL_FROM,
+    from: fromEmail,
     to: toEmail,
     subject: `Message from ${fname}`,
     text: `
